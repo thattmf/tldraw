@@ -279,8 +279,12 @@ function styleFromComputedStyle(
 		getStyle: (property: string) => style.getPropertyValue(property),
 	}
 
-	for (const property in style) {
-		if (!shouldIncludeCssProperty(property)) continue
+	// Iterate the declaration by index. `for...in` enumerates camelCase names (and
+	// numeric keys) in Chromium, but `getPropertyValue` takes the dashed CSS name, so
+	// hyphenated properties were silently dropped from pseudo-element exports.
+	for (let i = 0; i < style.length; i++) {
+		const property = style.item(i)
+		if (!property || !shouldIncludeCssProperty(property)) continue
 
 		const value = style.getPropertyValue(property)
 

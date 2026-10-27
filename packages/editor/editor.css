@@ -817,12 +817,40 @@ input,
 	list-style: revert;
 }
 
-.tl-rich-text ol:has(> li:nth-child(10)) {
-	padding-left: 2.625ch;
+/*
+ * Markers hang in the list's padding, so a marker wider than 1.625ch paints outside
+ * the bounds measured for the shape and gets clipped on export. Size a marker column
+ * to the widest marker instead, and let the text wrap in a second column.
+ *
+ * `counter(list-item)` keeps `start` and nested-list restarts working; an explicit
+ * `counter-increment` is needed because `display: grid` removes the implicit list item.
+ */
+.tl-rich-text ol {
+	display: grid;
+	grid-template-columns: max-content minmax(0, 1fr);
+	column-gap: 0.75ch;
+	padding-left: 0;
+	list-style: none;
 }
 
-.tl-rich-text ol:has(> li:nth-child(100)) {
-	padding-left: 3.625ch;
+.tl-rich-text ol > li {
+	display: grid;
+	grid-template-columns: subgrid;
+	grid-column: 1 / -1;
+	counter-increment: list-item;
+	/* Inherited by ::before; set here so it survives SVG export's pseudo-style inlining. */
+	text-align: right;
+}
+
+.tl-rich-text ol > li::before {
+	content: counter(list-item) '.';
+	grid-column: 1;
+	white-space: nowrap;
+}
+
+.tl-rich-text ol > li > * {
+	grid-column: 2;
+	text-align: left;
 }
 
 .tl-rich-text h1,
